@@ -1,9 +1,8 @@
 #lang racket
 
-(require redex)
+(require redex rackcheck)
 
 (require "./processor.rkt")
-(require "./compiler-generator.rkt")
 
 (define-language RegexC
   (ch ::= natural)
@@ -11,7 +10,7 @@
   (p ::= natural)
   (x ::= natural)
   (y ::= natural)
-  (i ::= ch "*" "?" "+" "|")
+  (i ::= ch * ? +)
   (op ::= (i n))
   (input ::= (op ...))
   (vm ::= (char ch) (split x y) (jmp x) mtch)
@@ -70,8 +69,26 @@
   shift : natural vmlist -> natural
   [(shift natural (vm ...)) ,(+ (term (sz (vm ...))) (term natural) )])
 
-;; (term (compile (+ 10 (* (+ 10 20)))))
+(define (cgen:char)
+  (gen:integer-in 1 99))
 
-;; (term (compile ,(compiler-generate)))
+(define (cgen:expr n)
+  (cond
+    [(positive? n) (gen:choice
+                    (cgen:char)
+                    (gen:let ([e (cgen:expr (sub1 n))])
+                             (gen:const (term (* ,e))))
+                    (gen:let ([e1 (cgen:expr (sub1 n))]
+                              [e2 (cgen:expr (sub1 n))])
+                             (gen:const (term (+ ,e1 ,e2))))
+                    )]
+    [else (cgen:char)]
+    ))
 
-(provide compile)
+(define expr-test (sample (cgen:expr 3) 1))
+
+(define (compiler:gen)
+  (define expr (sample (cgen:expr 5) 1))
+  (car expr))
+
+(provide RegexC compile compiler:gen)

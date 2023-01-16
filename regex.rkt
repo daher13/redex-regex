@@ -3,32 +3,52 @@
 (require redex)
 
 (define-language RegexL
-  (ch ::= natural)
-  (opor ::= ("+" ch ch))
-  (opstar ::= ("*" ch))
-  (e ::= opor opstar)
-  (t ::= or star char)
+  (e ::= eps natural (+ e e) (e e) (* e))
+  (s ::= (n ...) eps)
+  (t ::= eps char or cat star)
+  (p ::= (natural ...))
+  (n ::= natural)
   )
-
 
 (define-judgment-form RegexL
-  #:mode (types I O)
-  #:contract (types e t)
+  #:mode     (in-regex I I O)
+  #:contract (in-regex e s p)
+
   [
-   --------------------"T-or"
-   (types opor or)
+   ---------------------------"T-eps"
+   (in-regex eps s eps)
    ]
 
   [
-   --------------------"T-star"
-   (types opstar star)
+   ----------------------------------------------------------"T-char"
+   (in-regex natural_1 (natural_1 natural ...) (natural_1))
    ]
 
   [
-   --------------------"T-char"
-   (types ch char)
+   (in-regex e_1 (n_1 ... n_2 ...) (n_1 ...))
+   (in-regex e_2 (n_2 ...) (n_3 ...))
+   ----------------------------------------------------------"T-cat"
+   (in-regex (e_1 e_2) (n_1 ...  n_2 ...) (n_1 ... n_3 ...))
    ]
-  
+
+  [
+   (in-regex e_1 (n_1 ...) (n_2 ...))
+   ----------------------------------------------------------"T-or-1"
+   (in-regex (+ e_1 e_2) (n_1 ...) (n_2 ...))
+   ]
+
+  [
+   (in-regex e_2 (n_1 ...) (n_2 ...))
+   ----------------------------------------------------------"T-or-2"
+   (in-regex (+ e_1 e_2) (n_1 ...) (n_2 ...))
+   ]
+
+  [
+   ----------------------------------------------------------"T-star-eps"
+   (in-regex (* e) s ())
+   ]
+
   )
 
-(judgment-holds (types 2 char))
+;; (judgment-holds (in-regex ((+ 2 3) (+ 4 5)) (2 5) p) p)
+(judgment-holds (in-regex ((* 2)) eps p) p)

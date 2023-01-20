@@ -4,9 +4,8 @@
 
 (define-language RegexL
   (e ::= eps natural (+ e e) (e e) (* e))
-  (s ::= (n ...) eps)
-  (t ::= eps char or cat star)
-  (p ::= (natural ...))
+  (s ::= (n ...))
+  (p ::= (natural ...) fail)
   (n ::= natural)
   )
 
@@ -16,7 +15,7 @@
 
   [
    ---------------------------"T-eps"
-   (in-regex eps s eps)
+   (in-regex eps s ())
    ]
 
   [
@@ -25,10 +24,34 @@
    ]
 
   [
+   (side-condition (diff natural_1 natural_2))
+   ----------------------------------------------------------"T-char-fail"
+   (in-regex natural_1 (natural_2 natural ...) fail)
+   ]
+
+  [
+   ----------------------------------------------------------"T-char-empty"
+   (in-regex natural_1 () fail)
+   ]
+
+  [
    (in-regex e_1 (n_1 ... n_2 ...) (n_1 ...))
    (in-regex e_2 (n_2 ...) (n_3 ...))
    ----------------------------------------------------------"T-cat"
    (in-regex (e_1 e_2) (n_1 ...  n_2 ...) (n_1 ... n_3 ...))
+   ]
+
+  [
+   (in-regex e_1 (n_1 ... n_2 ...) fail)
+   ----------------------------------------------------------"T-cat-fail"
+   (in-regex (e_1 e_2) (n_1 ...  n_2 ...) fail)
+   ]
+
+  [
+   (in-regex e_1 (n_1 ... n_2 ...) (n_1 ...))
+   (in-regex e_2 (n_2 ...) fail)
+   ----------------------------------------------------------"T-cat-fail-2"
+   (in-regex (e_1 e_2) (n_1 ...  n_2 ...) fail)
    ]
 
   [
@@ -44,11 +67,33 @@
    ]
 
   [
+   (in-regex e_1 (n_1 ...) fail)
+   (in-regex e_2 (n_1 ...) fail)
+   ----------------------------------------------------------"T-or-fail"
+   (in-regex (+ e_1 e_2) (n_1 ...) fail)
+   ]
+
+  [
+   (in-regex e_1 s fail)
    ----------------------------------------------------------"T-star-eps"
-   (in-regex (* e) s ())
+   (in-regex (* e_1) s ())
+   ]
+
+  [
+   (in-regex e_1 (n_1 ... n_2 ... n_3 ...) (n_1 ...))
+   (in-regex (* e_1) (n_2 ... n_3 ...) (n_2 ...))
+   ---------------------------------------------------------------"T-star-1"
+   (in-regex (* e_1) (n_1 ... n_2 ... n_3 ...) (n_1 ... n_2 ...))
    ]
 
   )
 
-;; (judgment-holds (in-regex ((+ 2 3) (+ 4 5)) (2 5) p) p)
-(judgment-holds (in-regex ((* 2)) eps p) p)
+
+(define-metafunction RegexL
+  diff : natural natural -> boolean
+  [(diff natural_1 natural_1) #f]
+  [(diff natural_1 natural_2) #t])
+
+(provide (all-defined-out))
+
+;; (judgment-holds (in-regex (* (+ 2 3)) (2 5 2 3 2 3) p) p)

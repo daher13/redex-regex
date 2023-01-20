@@ -89,6 +89,9 @@
 
 (define (compiler:gen)
   (define expr (sample (cgen:expr 5) 1))
-  (car expr))
+  (car expr)
+  )
 
-(provide RegexC compile compiler:gen)
+;; (term (compile (+ 2 3)))
+
+(provide (all-defined-out))

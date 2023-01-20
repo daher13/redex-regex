@@ -9,7 +9,7 @@
 (define (gen-input e n)
   (match e
     ['eps (gen:const '())]
-    [(? natural? e) (gen:const (list e))]
+    [(? natural? e) (gen:const e)]
     [(list '* e1) (gen:repeat (gen-input e1 n) n)]
     [(list '+ e1 e2) (gen:choice (gen-input e1 n) (gen-input e2 n))]
     [(list e1 e2) (gen:bind
@@ -29,4 +29,7 @@
                 (lambda (xs) (gen:bind g
                                 (lambda (x) (gen:const (cons x xs))))))))
 
-(gen-input (list 10 20) 2)
+
+(provide gen-input)
+
+;; (sample (gen-input (list '* 20) 5) 1)

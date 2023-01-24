@@ -4,7 +4,7 @@
  "./compiler.rkt"
  "./input-gen.rkt"
  "./regex.rkt"
- "./processor.rkt"
+ "./vm.rkt"
  rackcheck
  rackunit
  redex/reduction-semantics
@@ -26,7 +26,7 @@
         (x (judgment-holds (in-regex ,(result-re inp)
                             ,(result-str inp)
                             p) p))
-        (y (get-processor-output (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))))
+        (y (vm:process (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))))
         )
     (equal? x y)))
 
@@ -44,7 +44,7 @@
 ;; (term (compile ,(result-re inp)))
 
 ;; y
-(apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
+(vm:process (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f))))
 ;; (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
 ;; (traces ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
 

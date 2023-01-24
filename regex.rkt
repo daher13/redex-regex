@@ -93,4 +93,4 @@
   [(diff natural_1 natural_1) #f]
   [(diff natural_1 natural_2) #t])
 
-(provide (all-defined-out))
+(provide in-regex)

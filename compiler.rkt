@@ -85,13 +85,13 @@
     [else (cgen:char)]
     ))
 
-(define expr-test (sample (cgen:expr 3) 1))
+;; (define expr-test (sample (cgen:expr 3) 1))
 
-(define (compiler:gen)
-  (define expr (sample (cgen:expr 5) 1))
-  (car expr)
-  )
+;; (define (compiler:gen)
+;;   (define expr (sample (cgen:expr 5) 1))
+;;   (car expr)
+;;   )
 
 ;; (term (compile (+ 2 3)))
 
-(provide (all-defined-out))
+(provide cgen:expr compile)

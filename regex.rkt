@@ -85,7 +85,6 @@
    ---------------------------------------------------------------"T-star-1"
    (in-regex (* e_1) (n_1 ... n_2 ... n_3 ...) (n_1 ... n_2 ...))
    ]
-
   )
 
 
@@ -95,5 +94,3 @@
   [(diff natural_1 natural_2) #t])
 
 (provide (all-defined-out))
-
-;; (judgment-holds (in-regex (* (+ 2 3)) (2 5 2 3 2 3) p) p)

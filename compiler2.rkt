@@ -22,7 +22,7 @@
 (define-metafunction RegexC
   compileN : natural exp -> vmlist
   [(compileN natural_1 natural_2) ((char natural_2))]
-  [(compileN natural (+ exp_1 exp_2)) (mk-choice natural (compileN (sum (natural 1)) exp_1) exp_2)]
+  [(compileN natural (+ exp_1 exp_2)) (mk-choice natural (compileN natural exp_1) exp_2)]
   [(compileN natural (exp_1 exp_2)) (mk-seq natural (compileN natural exp_1) exp_2)]
   [(compileN natural (* exp)) (mk-kleene natural (compileN natural exp))]
   )
@@ -50,7 +50,7 @@
 
 (define-metafunction RegexC
   mk-kleene : natural vmlist -> vmlist
-  [(mk-kleene natural (vm_1 ...)) ((split (sum (natural 1)) (sum (natural (sz (vm_1 ...)) 2))) vm_1 ... (jmp natural))])
+  [(mk-kleene natural (vm_1 ...)) ((split (sum (natural 1)) (sum (natural (sz (vm_1 ...)) 2))) vm_1 ... (jmp (sum (natural (sz (vm_1 ...))))))])
 
 (define-metafunction RegexC
   sum : (natural ...)  -> natural
@@ -77,13 +77,12 @@
     [(positive? n) (gen:choice
                     (cgen:char)
                     (gen:let ([e (cgen:expr (sub1 n))])
-                             (gen:const (term (* ,e))))
+                             (gen:const (term (,e (* ,e)))))
                     (gen:let ([e1 (cgen:expr (sub1 n))]
                               [e2 (cgen:expr (sub1 n))])
                              (gen:const (term (+ ,e1 ,e2))))
                     )]
-    [else (cgen:char)]
-    ))
+    [else (cgen:char)]))
 
 (define expr-test (sample (cgen:expr 3) 1))
 

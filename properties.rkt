@@ -2,29 +2,51 @@
 
 (require
  "./compiler.rkt"
- "./processor.rkt"
  "./input-gen.rkt"
- "regex.rkt"
+ "./regex.rkt"
+ "./processor.rkt"
  rackcheck
  rackunit
  redex/reduction-semantics
+ redex
  )
 
+(struct result
+  (re str)
+  #:transparent)
+
+(define (gen:data n m)
+  (gen:bind (cgen:expr n)
+            (lambda (e) (gen:bind (gen-input e m)
+                                  (lambda (s) (gen:const (result e s)))))))
 
 (define-property gen-wf
-  (
-   [expr (gen:const (compiler:gen))]
-   ;; [compiled (gen:const (term (compile ,expr)))]
-   ;; [in (gen:const (gen-input expr 5))]
-   ;; [pout (gen:const (get-processor-output (apply-reduction-relation* ->e  (term ,(0 (car compiled) compiled in '() #f)))))] ;; processor output
-   ;; [rout (gen:const (judgment-holds (in-regex expr in p) p))] ;; regex output
-    )
-  ;; (term (compile ,expr))
-  (gen-input expr 5)
-  
-  )
+  ((inp (gen:data 3 2)))
+  (let (
+        (x (judgment-holds (in-regex ,(result-re inp)
+                            ,(result-str inp)
+                            p) p))
+        (y (get-processor-output (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))))
+        )
+    (equal? x y)))
 
-;; (define reduction (apply-reduction-relation* ->e  (term (0 (char 10) ((char 10) (split 0 2) (char 20) (split 2 4) mtch) (10 10 20) () #f))))
+;; (define inp (result '(* 87) '(87 87)))
+;; (define inp (result '(+ (* (+ 1 1)) (+ (* 1) 2)) '(2)))
 
-(check-property (make-config #:tests 1)
-                gen-wf)
+(define inp (result '(* 1) '(1)))
+;; (define inp (result '(+ (+ 6 (* 34)) (+ (+ 86 18) 17)) '(18)))
+
+;; x
+(judgment-holds (in-regex ,(result-re inp)
+                            ,(result-str inp)
+                            p) p)
+
+;; (term (compile ,(result-re inp)))
+
+;; y
+(apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
+;; (apply-reduction-relation* ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
+;; (traces ->e (term (0 ,(list-ref (term (compile ,(result-re inp))) 0) (compile ,(result-re inp)) ,(result-str inp) () #f)))
+
+;; (check-property (make-config #:tests 5) gen-wf)
+
